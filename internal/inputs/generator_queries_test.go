@@ -17,6 +17,7 @@ import (
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/clickhouse"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/cratedb"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/influx"
+	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/kdb"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/mongo"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/questdb"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/siridb"
@@ -360,6 +361,13 @@ func TestGetUseCaseGenerator(t *testing.T) {
 	if got := tts.(*timescaledb.Devops).UseTimeBucket; got != c.TimescaleUseTimeBucket {
 		t.Errorf("timescaledb UseTimeBucket not set correctly: got %v want %v", got, c.TimescaleUseTimeBucket)
 	}
+
+	bk := kdb.BaseGenerator{}
+	kdb, err := bk.NewDevops(tsStart, tsEnd, scale)
+	if err != nil {
+		t.Fatalf("Error creating influx query generator")
+	}
+	checkType(constants.FormatKDB, kdb)
 
 	// Test error condition
 	c.Format = "bad format"

@@ -25,6 +25,7 @@ Current databases supported:
 + ClickHouse [(supplemental docs)](docs/clickhouse.md)
 + CrateDB [(supplemental docs)](docs/cratedb.md)
 + InfluxDB [(supplemental docs)](docs/influx.md)
++ KDB [(supplemental docs)](docs/kdb.md)
 + MongoDB [(supplemental docs)](docs/mongo.md)
 + QuestDB [(supplemental docs)](docs/questdb.md)
 + SiriDB [(supplemental docs)](docs/siridb.md)
@@ -72,12 +73,12 @@ diagnostic data and metrics from each truck, and introduces environmental
 factors such as out-of-order data and batch ingestion (for trucks
 that are offline for a period of time). It also tracks truck metadata
 and uses this to tie metrics and diagnostics together as part of the query
-set.  
+set.
 
 The queries that are generated as part of this use case will cover both real
 time truck status and analytics that will look at the time series data in
 an effort to be more predictive about truck behavior.  The scale factor with
-this use case will be based on the number of trucks tracked.  
+this use case will be based on the number of trucks tracked.
 
 ---
 
@@ -91,6 +92,7 @@ cases are implemented for each database:
 |ClickHouse|X||
 |CrateDB|X||
 |InfluxDB|X|X|
+|KDB|X||
 |MongoDB|X|
 |QuestDB|X|X²|
 |SiriDB|X|
@@ -109,7 +111,7 @@ query execution performance. (It currently does not measure
 concurrent insert and query performance, which is a future priority.)
 To accomplish this in a fair way, the data to be inserted and the
 queries to run are pre-generated and native Go clients are used
-wherever possible to connect to each database (e.g., `mgo` for MongoDB, 
+wherever possible to connect to each database (e.g., `mgo` for MongoDB,
 `aws sdk` for Timestream).
 
 Although the data is randomly generated, TSBS data and queries are
@@ -234,8 +236,8 @@ db specific executables `tsbs_load_*`
 #### Using the unified `tsbs_load` executable
 
 The `tsbs_load` executable can load data in any of the supported databases.
-It can use a pregenerated data file as input, or simulate the data on the 
-fly. 
+It can use a pregenerated data file as input, or simulate the data on the
+fly.
 
 You first start by generating a config yaml file populated with the default
 values for each property with:

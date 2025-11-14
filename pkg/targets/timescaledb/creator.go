@@ -177,7 +177,19 @@ func (d *dbCreator) createTableAndIndexes(dbBench *sql.DB, tableName string, fie
 	}
 
 	MustExec(dbBench, fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName))
-	MustExec(dbBench, fmt.Sprintf("CREATE TABLE %s (time timestamptz, tags_id integer, %s, additional_tags JSONB DEFAULT NULL)", tableName, strings.Join(fieldDefs, ",")))
+
+	createTableSQL := fmt.Sprintf("CREATE TABLE %s (time timestamptz NOT NULL, tags_id integer, %s, additional_tags JSONB DEFAULT NULL)", tableName, strings.Join(fieldDefs, ","))
+	if d.opts.UseHypertable {
+		MustExec(dbBench, "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE")
+		// For TimescaleDB 2.20+, we use CREATE TABLE with the appropriate options
+		// instead of create_hypertable function
+		hypertableOptions := fmt.Sprintf(
+			"WITH (tsdb.hypertable, tsdb.partitioning_column = 'time', tsdb.chunk_interval = '%d milliseconds')",
+			d.opts.ChunkTime.Milliseconds())
+		MustExec(dbBench, createTableSQL+hypertableOptions)
+	} else {
+		MustExec(dbBench, createTableSQL)
+	}
 	if d.opts.PartitionIndex {
 		MustExec(dbBench, fmt.Sprintf("CREATE INDEX ON %s(%s, \"time\" DESC)", tableName, partitionColumn))
 	}
@@ -193,43 +205,6 @@ func (d *dbCreator) createTableAndIndexes(dbBench *sql.DB, tableName string, fie
 
 	for _, indexDef := range indexDefs {
 		MustExec(dbBench, indexDef)
-	}
-
-	if d.opts.UseHypertable {
-		var creationCommand string = "create_hypertable"
-		var partitionsOption string = "replication_factor => NULL"
-
-		MustExec(dbBench, "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE")
-
-		// Replication factor determines whether we create a distributed hypertable
-		// or not. If it is unset or zero, then we will create a regular
-		// hypertable with no partitions.
-		//
-		// If replication factor is greater >= 1, we assume there are at least multiple
-		// data nodes. We currently use `create_hypertable` for both statements, the
-		// default behavior is to create a distributed hypertable if `replication_factor`
-		// is >= 1
-
-		// We assume a single partition hypertable. This provides an option to test
-		// partitioning on regular hypertables
-		if d.opts.NumberPartitions > 0 {
-			partitionsOption = fmt.Sprintf("partitioning_column => '%s'::name, number_partitions => %v::smallint", partitionColumn, d.opts.NumberPartitions)
-		}
-
-		if d.opts.ReplicationFactor > 0 {
-			// This gives us a future option of testing the impact of
-			// multi-node replication across data nodes
-			partitionsOption = fmt.Sprintf("partitioning_column => '%s'::name, replication_factor => %v::smallint", partitionColumn, d.opts.ReplicationFactor)
-		}
-
-		_ = partitionsOption
-
-		//MustExec(dbBench,
-		//	fmt.Sprintf("SELECT %s('%s'::regclass, 'time'::name, %s, chunk_time_interval => %d, create_default_indexes=>FALSE)",
-		//		creationCommand, tableName, partitionsOption, d.opts.ChunkTime.Nanoseconds()/1000))
-		MustExec(dbBench,
-			fmt.Sprintf("SELECT %s('%s'::regclass, by_range('time'::name, INTERVAL '%d microseconds'), create_default_indexes=>FALSE)",
-				creationCommand, tableName, d.opts.ChunkTime.Nanoseconds()/1000))
 	}
 }
 

@@ -37,6 +37,24 @@ func (d *Devops) getSelectAggClauses(aggFunc string, idents []string) []string {
 	return selectAggClauses
 }
 
+// getSelectAggOutputNames builds specified aggregate function clause output column name
+// a set of column idents. Useful for extra renaming
+//
+// For instance:
+//
+//	max_cpu_time
+func (d *Devops) getSelectAggOutputNames(aggFunc string, idents []string) []string {
+	colRename := make(map[string]string)
+	colRename["avg"] = "mean"
+
+	selectAggClauses := make([]string, len(idents))
+	for i, ident := range idents {
+		selectAggClauses[i] =
+			fmt.Sprintf("%[1]s_%[2]s AS %[3]s_%[2]s", aggFunc, ident, colRename[aggFunc])
+	}
+	return selectAggClauses
+}
+
 // MaxAllCPU selects the MAX of all metrics under 'cpu' per hour for N random
 // hosts
 //
@@ -126,7 +144,7 @@ func (d *Devops) GroupByOrderByLimit(qi query.Query) {
 // Queries:
 // lastpoint
 func (d *Devops) LastPointPerHost(qi query.Query) {
-	sql := fmt.Sprintf(`SELECT * FROM cpu latest by hostname`)
+	sql := fmt.Sprintf(`SELECT timestamp AS time, * FROM cpu latest by hostname`)
 
 	humanLabel := "QuestDB last row per host"
 	humanDesc := humanLabel

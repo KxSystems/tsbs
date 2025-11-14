@@ -1,0 +1,12 @@
+# Typical qce setup:
+# export QEXEC="${HOME}/bin/qce"
+
+# Typical kdb-x setup:
+# export QEXEC="${HOME}/.kx/bin/q"
+
+# Typical kdb+ setup
+export QHOME="${HOME}/q"
+export QEXEC="${QHOME}/l64/q"
+
+## Directory of the kdb+ data. It should be on a fast drive
+export DBDIR="${HOME}/tsbs/db"
