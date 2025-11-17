@@ -6,6 +6,7 @@ import (
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/clickhouse"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/cratedb"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/influx"
+	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/kdb"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/mongo"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/questdb"
 	"github.com/questdb/tsbs/cmd/tsbs_generate_queries/databases/siridb"
@@ -39,5 +40,6 @@ func InitQueryFactories(config *config.QueryGeneratorConfig) map[string]interfac
 		DBName: config.DbName,
 	}
 	factories[constants.FormatQuestDB] = &questdb.BaseGenerator{}
+	factories[constants.FormatKDB] = &kdb.BaseGenerator{}
 	return factories
 }

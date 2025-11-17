@@ -1,0 +1,13 @@
+export HDBNR=10
+export LOADBALANCER=socketsharding  # socketsharding, kdblb or kdblb-mt
+export QUERYTYPE=fast
+export QMAP=true
+export QUERYRETRY=noretry
+
+# HDB processes can be started with a numactl command.
+# Option `roundrobin` means that worker `i` is started on numa node `i mod N` where N is the number of numa nodes.
+# If N is 1 or NUMA is set to `nonuma` then no numactl is used.
+export NUMA="nonuma" # nonuma or roundrobin
+
+export HDBTHREADNR=8
+export RDBTHREADNR=8

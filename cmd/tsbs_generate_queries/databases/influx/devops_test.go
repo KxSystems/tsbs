@@ -137,10 +137,10 @@ func TestDevopsGetSelectClausesAggMetrics(t *testing.T) {
 func TestDevopsGroupByTime(t *testing.T) {
 	expectedHumanLabel := "Influx 1 cpu metric(s), random    1 hosts, random 1s by 1m"
 	expectedHumanDesc := "Influx 1 cpu metric(s), random    1 hosts, random 1s by 1m: 1970-01-01T00:05:58Z"
-	expectedQuery := "SELECT max(usage_user) from cpu " +
+	expectedQuery := "SELECT time AS minute, * FROM (SELECT max(usage_user) AS max_usage_user from cpu " +
 		"where (hostname = 'host_9') and " +
 		"time >= '1970-01-01T00:05:58Z' and time < '1970-01-01T00:05:59Z' " +
-		"group by time(1m)"
+		"group by time(1m))"
 
 	v := url.Values{}
 	v.Set("q", expectedQuery)
@@ -169,8 +169,8 @@ func TestDevopsGroupByTime(t *testing.T) {
 func TestDevopsGroupByOrderByLimit(t *testing.T) {
 	expectedHumanLabel := "Influx max cpu over last 5 min-intervals (random end)"
 	expectedHumanDesc := "Influx max cpu over last 5 min-intervals (random end): 1970-01-01T00:16:22Z"
-	expectedQuery := "SELECT max(usage_user) from cpu " +
-		"WHERE time < '1970-01-01T01:16:22Z' group by time(1m) limit 5"
+	expectedQuery := "SELECT time AS minute, * FROM (SELECT max(usage_user) AS max_usage_user from cpu " +
+		"WHERE time < '1970-01-01T01:16:22Z' group by time(1m)) order by time desc limit 5"
 
 	v := url.Values{}
 	v.Set("q", expectedQuery)
@@ -205,9 +205,9 @@ func TestDevopsGroupByTimeAndPrimaryTag(t *testing.T) {
 			input:              1,
 			expectedHumanLabel: "Influx mean of 1 metrics, all hosts, random 12h0m0s by 1h",
 			expectedHumanDesc:  "Influx mean of 1 metrics, all hosts, random 12h0m0s by 1h: 1970-01-01T00:16:22Z",
-			expectedQuery: "SELECT mean(usage_user) from cpu " +
+			expectedQuery: "SELECT time AS hour, * FROM (SELECT mean(usage_user) from cpu " +
 				"where time >= '1970-01-01T00:16:22Z' and time < '1970-01-01T12:16:22Z' " +
-				"group by time(1h),hostname",
+				"group by time(1h),hostname)",
 		},
 		{
 			desc:               "5 metrics",
@@ -246,24 +246,28 @@ func TestMaxAllCPU(t *testing.T) {
 			input:              1,
 			expectedHumanLabel: "Influx max of all CPU metrics, random    1 hosts, random 8h0m0s by 1h",
 			expectedHumanDesc:  "Influx max of all CPU metrics, random    1 hosts, random 8h0m0s by 1h: 1970-01-01T00:54:10Z",
-			expectedQuery: "SELECT max(usage_user),max(usage_system),max(usage_idle),max(usage_nice),max(usage_iowait)," +
-				"max(usage_irq),max(usage_softirq),max(usage_steal),max(usage_guest),max(usage_guest_nice) " +
+			expectedQuery: "SELECT time AS hour, * FROM (SELECT max(usage_user) AS max_usage_user, max(usage_system) AS max_usage_system, max(usage_idle) AS max_usage_idle," +
+				"max(usage_nice) AS max_usage_nice, max(usage_iowait) AS max_usage_iowait," +
+				"max(usage_irq) AS max_usage_irq, max(usage_softirq) AS max_usage_softirq, max(usage_steal) AS max_usage_steal, " +
+				"max(usage_guest) AS max_usage_guest, max(usage_guest_nice) AS max_usage_guest_nice " +
 				"from cpu " +
 				"where (hostname = 'host_3') and " +
 				"time >= '1970-01-01T00:54:10Z' and time < '1970-01-01T08:54:10Z' " +
-				"group by time(1h)",
+				"group by time(1h))",
 		},
 		{
 			desc:               "5 hosts",
 			input:              5,
 			expectedHumanLabel: "Influx max of all CPU metrics, random    5 hosts, random 8h0m0s by 1h",
 			expectedHumanDesc:  "Influx max of all CPU metrics, random    5 hosts, random 8h0m0s by 1h: 1970-01-01T00:37:12Z",
-			expectedQuery: "SELECT max(usage_user),max(usage_system),max(usage_idle),max(usage_nice),max(usage_iowait)," +
-				"max(usage_irq),max(usage_softirq),max(usage_steal),max(usage_guest),max(usage_guest_nice) " +
+			expectedQuery: "SELECT time AS hour, * FROM (SELECT max(usage_user) AS max_usage_user, max(usage_system) AS max_usage_system, max(usage_idle) AS max_usage_idle," +
+				"max(usage_nice) AS max_usage_nice, max(usage_iowait) AS max_usage_iowait," +
+				"max(usage_irq) AS max_usage_irq, max(usage_softirq) AS max_usage_softirq, max(usage_steal) AS max_usage_steal, " +
+				"max(usage_guest) AS max_usage_guest, max(usage_guest_nice) AS max_usage_guest_nice " +
 				"from cpu " +
 				"where (hostname = 'host_9' or hostname = 'host_5' or hostname = 'host_1' or hostname = 'host_7' or hostname = 'host_2') " +
 				"and time >= '1970-01-01T00:37:12Z' and time < '1970-01-01T08:37:12Z' " +
-				"group by time(1h)",
+				"group by time(1h))",
 		},
 	}
 

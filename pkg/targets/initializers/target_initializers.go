@@ -11,6 +11,7 @@ import (
 	"github.com/questdb/tsbs/pkg/targets/constants"
 	"github.com/questdb/tsbs/pkg/targets/crate"
 	"github.com/questdb/tsbs/pkg/targets/influx"
+	"github.com/questdb/tsbs/pkg/targets/kdb"
 	"github.com/questdb/tsbs/pkg/targets/mongo"
 	"github.com/questdb/tsbs/pkg/targets/prometheus"
 	"github.com/questdb/tsbs/pkg/targets/questdb"
@@ -46,6 +47,8 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return timestream.NewTarget()
 	case constants.FormatQuestDB:
 		return questdb.NewTarget()
+	case constants.FormatKDB:
+		return kdb.NewTarget()
 	}
 
 	supportedFormatsStr := strings.Join(constants.SupportedFormats(), ",")

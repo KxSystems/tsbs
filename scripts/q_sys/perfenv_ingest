@@ -1,0 +1,34 @@
+# storage medium of the data, `ondisk` or `inmemory`
+export DATAMEDIA=ondisk
+#export DATAMEDIA=inmemory
+
+# upsert function to use either `native` or `custom`
+export UPSERT=native
+#export UPSERT=custom
+
+#export QEN=native
+export QEN=custom
+
+# put index (grouped attribute) on column fleet to speed up the queries and slow down ingestion a bit
+export INDEXONFLEET=false
+
+# Maximum number of rows stored locally in writer before it writes out to disk
+export WRITERCACHESIZE=25000
+#export WRITERCACHESIZE=0
+
+############ Config for bridge ##################
+# move string parsing out of the writer into bridge kdb+ processes
+#export BRIDGED=false
+export BRIDGED=true
+
+# by default leave one for the writer and one for the publisher
+export BRIDGENR=10
+
+# bridge to writer communicaton sync or async
+export TRANSFERTOWRITER=async
+#export TRANSFERTOWRITER=sync
+
+# true to use unix domain sockets for communication instead of qIPC
+# export UNIXSOCKET=true
+export UNIXSOCKET=false
+export WRITETHREADNR=16
